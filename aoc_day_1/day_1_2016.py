@@ -2,12 +2,8 @@
 This is day 1 of AOC 2016
 """
 
-import math
 import typing
 import pytest
-
-open("day_1_part_2_data.txt", "w").close()
-
 
 
 def determine_direction(turn: str, current_direction: int) -> int:
@@ -27,9 +23,19 @@ class Position:
         self.current_direction = current_direction
 
 
-def move(pos: Position, input_direction: str, input_distance: int) -> Position:
+def move(pos: Position, input_direction: str, input_distance: int, attempt: bool, visited_positions):
     i = 0
     while i < input_distance:
+
+        current_position = str(pos.x_position) + "," + str(pos.y_position)
+        if attempt:
+            if current_position in visited_positions:
+                intersection_distance = abs(pos.x_position) + abs(pos.y_position)
+                print("Answer to part 2: " + str(intersection_distance))
+                attempt = False
+            else:
+                visited_positions[current_position] = 1
+
         # north
         if pos.current_direction == 0:
             if input_direction == "R":
@@ -55,24 +61,8 @@ def move(pos: Position, input_direction: str, input_distance: int) -> Position:
             else:
                 pos.y_position -= 1
         i += 1
-        #adding each position to a txt file as I go through each step
-        coordinates = open("day_1_part_2_data.txt", "a")
-        coordinates.write(str(pos.x_position) + "," + str(pos.y_position) + "\n")
-        coordinates.close()
-        #setting the current location as a string for comparison
-        current_spot = str(pos.x_position) + "," + str(pos.y_position)
-        first_intersection(current_spot)
 
-
-        # coordinates = open("day_1_part_2_data.txt", "r")
-        # print(coordinates.readlines())
-        # for steps in coordinates.readlines():
-        #     if steps == "1,-1":
-        #         print("Yep!!!")
-            # if steps == current_spot:
-            #     interception_distance = abs(pos.x_position) + abs(pos.y_position)
-            #     print("interception distance: " + interception_distance)
-    return pos
+    return pos, attempt, visited_positions
 
 
 def final_location(pos: Position) -> int:
@@ -80,33 +70,22 @@ def final_location(pos: Position) -> int:
     return result
 
 
-def first_intersection(current_spot):
-    coordinates = open("day_1_part_2_data.txt", "r")
-    stops = coordinates.readlines()
-    incomplete = True
-
-    if incomplete:
-        for steps in stops:
-            if "1,-1" in steps:
-                print((steps[0]))
-
-
 def main():
+    attempt = True
     data = open("day_1_data.txt", "r")
     movements = data.readlines()[0].split(", ")
     position = Position(0, 0, 0)
+    visited_positions: typing.Dict[str, int] = {}
 
     for instruction in movements:
         direction = instruction[0]
         distance = int(instruction[1:])
-        location = move(position, direction, distance)
+        location, attempt, visited_positions = move(position, direction, distance, attempt, visited_positions)
         location.current_direction = determine_direction(direction, position.current_direction)
 
     final_distance = final_location(location)
 
-    # first_intersection()
-
-    print(final_distance)
+    print("Answer to part 1: " + str(final_distance))
 
 
 if __name__ == "__main__":
